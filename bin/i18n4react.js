@@ -23,7 +23,7 @@ var execute = function(command, callback, errback){
 };
 
 cli.setUsage("i18n4react [OPTIONS]");
-cli.setApp("i18n4react", "0.1.1");
+cli.setApp("i18n4react", "0.1.2");
 
 cli.parse({
     extract: ['e', 'Input directory', 'path'],
@@ -40,16 +40,15 @@ cli.main(function (args, options) {
 
     if(dir) {
         base = path.parse(dir).base;
-        temp = path.join('./', base);
+        temp = path.join(baseDir, '../temp', base);
         if(fs.lstatSync(dir).isDirectory()) {
             cp(dir, temp).read(function() {
                 execute(path.join(baseDir, "../node_modules/.bin/babel") + " -q --plugins react-intl " + path.join(temp, '**/*.jsx'), function(out){
                     console.log('done extracting');
                     merge({output: outDir, lang: lang}, function() {
-                        clean(temp);
-                        clean('./messages');
+                        clean(path.join(baseDir, '../temp'));
                         console.log('done merging');
-                    })
+                    });
                 });
             });
         } else {

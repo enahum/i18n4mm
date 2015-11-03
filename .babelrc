@@ -2,7 +2,7 @@
     "plugins": ["react-intl"],
     "extra": {
         "react-intl": {
-            "messagesDir": "./messages/"
+            "messagesDir": "./temp/messages/"
         }
     }
 }
