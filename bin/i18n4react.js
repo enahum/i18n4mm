@@ -23,12 +23,12 @@ var execute = function(command, callback, errback){
 };
 
 cli.setUsage("i18n4react [OPTIONS]");
-cli.setApp("i18n4react", "0.1.0");
+cli.setApp("i18n4react", "0.1.1");
 
 cli.parse({
-    extract: ['e', 'input directory', 'path'],
-    'output': ['o', 'output directory (Default is i18n)', 'path'],
-    lang: ['l', 'Set the default language to name the merged output file', 'lang', 'en']
+    extract: ['e', 'Input directory', 'path'],
+    output: ['o', 'Output directory (Default is i18n)', 'path'],
+    lang: ['l', 'Set the default language to name the merged output file', 'string', 'en']
 });
 
 cli.main(function (args, options) {

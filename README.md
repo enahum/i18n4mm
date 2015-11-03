@@ -14,9 +14,9 @@ The CLI help will display this:
       i18n4react [OPTIONS]
 
     Options:
-      -e, --extract PATH     input directory
-      -o, --output PATH      output directory (Default is i18n)
-      -l, --lang [LANG]      Set the default language to name the merged output
+      -e, --extract PATH     Input directory
+      -o, --output PATH      Output directory (Default is i18n)
+      -l, --lang [STRING]    Set the default language to name the merged output
                              file  (Default is en)
       -v, --version          Display the current version
       -h, --help             Display help and usage details
