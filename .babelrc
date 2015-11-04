@@ -1,4 +1,9 @@
 {
+    "stage": 4,
+    "optional": [
+        "runtime",
+        "es7.objectRestSpread"
+    ],
     "plugins": ["react-intl"],
     "extra": {
         "react-intl": {

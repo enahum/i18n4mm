@@ -5,7 +5,7 @@
 
 ## Installation
 
-    $ npm install -g git+https://git@github.com:ZBoxApp/i18n4react.git
+    $ npm install git+https://git@github.com:ZBoxApp/i18n4react.git
 
 ## Options
 The CLI help will display this:
@@ -24,7 +24,11 @@ The CLI help will display this:
 
 ## Usage
 
-    $ i18n4react -e <directory with react-intl jsx files> -o <output directory> -l en-US
+    $ ./node_modules/.bin/i18n4react -e <directory with react-intl jsx files> -o <output directory> -l en-US
+
+## TODO
+
+Make the CLI without outside dependancies to make it work as a standalone
 
 ## License
 

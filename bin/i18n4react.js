@@ -3,6 +3,8 @@ var cli = require('cli').enable("version"),
     fs = require('fs'),
     path = require('path'),
     cp = require("cp-r"),
+    glob = require('glob').sync,
+    babel = require('babel-core'),
     clean = require('rimraf').sync,
     exec = require('child_process').exec,
     merge = require('../lib/merge');
@@ -35,20 +37,27 @@ cli.main(function (args, options) {
     var dir = options.extract,
         outDir = options.output || path.join(process.cwd() + '/i18n'),
         baseDir = path.dirname(fs.realpathSync(__filename)),
+        msgDir = path.join(process.cwd(), './temp', 'messages'),
         lang = options.lang,
-        base, temp;
+        base, temp, files;
 
     if(dir) {
         base = path.parse(dir).base;
         temp = path.join(baseDir, '../temp', base);
         if(fs.lstatSync(dir).isDirectory()) {
             cp(dir, temp).read(function() {
-                execute(path.join(baseDir, "../node_modules/.bin/babel") + " -q --plugins react-intl " + path.join(temp, '**/*.jsx'), function(out){
-                    console.log('done extracting');
-                    merge({output: outDir, lang: lang}, function() {
-                        clean(path.join(baseDir, '../temp'));
-                        console.log('done merging');
+                files = glob(path.join(temp, "/**/*.jsx"));
+                files.forEach(function(file){
+                    babel.transformFileSync(file, {
+                        plugins: ["react-intl"],
+                        modules: "amd"
                     });
+                });
+                console.log('done extracting');
+                merge({msgDir: msgDir, output: outDir, lang: lang}, function() {
+                    clean(path.join(baseDir, '../temp'));
+                    clean(path.join(msgDir, '../'));
+                    console.log('done merging');
                 });
             });
         } else {
