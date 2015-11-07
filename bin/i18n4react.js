@@ -2,12 +2,12 @@
 var cli = require('cli').enable("version"),
     fs = require('fs'),
     path = require('path'),
-    cp = require("cp-r"),
     glob = require('glob').sync,
     babel = require('babel-core'),
     clean = require('rimraf').sync,
     exec = require('child_process').exec,
-    merge = require('../lib/merge');
+    merge = require('../lib/merge'),
+    cp = require("../lib/copy");
 
 var execute = function(command, callback, errback){
     exec(command, {maxBuffer: 1024 * 1024 * 5}, function(err, stdout, stderr){
@@ -45,7 +45,7 @@ cli.main(function (args, options) {
         base = path.parse(dir).base;
         temp = path.join(baseDir, '../temp', base);
         if(fs.lstatSync(dir).isDirectory()) {
-            cp(dir, temp).read(function() {
+            cp(dir, temp, ['node_modules']).read(function() {
                 files = glob(path.join(temp, "/**/*.jsx"));
                 files.forEach(function(file){
                     babel.transformFileSync(file, {
