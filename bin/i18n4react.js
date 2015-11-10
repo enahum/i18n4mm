@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var cli = require('cli').enable("version"),
+    winston = require('winston'),
     fs = require('fs'),
     path = require('path'),
     glob = require('glob').sync,
@@ -24,17 +25,40 @@ var execute = function(command, callback, errback){
     });
 };
 
+var colors = {
+    error: 'red',
+    warn: 'yellow',
+    info: 'blue',
+    debug: 'green'
+};
+
+winston.addColors(colors);
+
+var log = new winston.Logger({
+    transports: [
+        new winston.transports.Console({
+            colorize: true,
+            level: 'debug'
+        })
+    ]
+});
+
+
 cli.setUsage("i18n4react [OPTIONS]");
 cli.setApp("i18n4react", "0.1.2");
 
 cli.parse({
     extract: ['e', 'Input directory', 'path'],
     output: ['o', 'Output directory (Default is i18n)', 'path'],
-    lang: ['l', 'Set the default language to name the merged output file', 'string', 'en']
+    lang: ['l', 'Set the default language to name the merged output file', 'string', 'en'],
+    compare: ['c', 'Compare JSON files'],
+    original: ['g', 'Original JSON file', 'file'],
+    translated: ['t', 'Translated JSON file', 'file'],
 });
 
 cli.main(function (args, options) {
     var dir = options.extract,
+        compare = options.compare,
         outDir = options.output || path.join(process.cwd() + '/i18n'),
         baseDir = path.dirname(fs.realpathSync(__filename)),
         msgDir = path.join(process.cwd(), './temp', 'messages'),
@@ -64,7 +88,36 @@ cli.main(function (args, options) {
             console.error("ERROR: extract option is not a directory\n");
             cli.getUsage(1);
         }
-    } else {
+    } else if(compare) {
+        if(options.original && options.translated) {
+            var files = [options.original, options.translated];
+            files.map(function (filename) {
+                return fs.readFileSync(filename, 'utf8');
+            }).map(function(file) {
+                return JSON.parse(file);
+            }).reduce(function(collection, descriptors) {
+                var error = false;
+                for(var key in collection) {
+                    if(!descriptors.hasOwnProperty(key)) {
+                        error = true;
+                        log.error('missing: %s', key);
+                    }
+                }
+                if(error){
+                  log.warn('Add the missing keys to the translated file and try again')
+                } else {
+                    log.info("Original and Translated files have the same keys");
+                }
+            });
+        } else if(options.original) {
+            console.log('Translated JSON file missing');
+        } else if (options.translated) {
+            console.log('Original JSON file missing');
+        } else {
+            console.log('To compare files the -g and -t flag are required')
+        }
+    }
+    else {
         console.error("ERROR: directory that contains the files to be used in extraction must be set\n");
         cli.getUsage(1);
     }
