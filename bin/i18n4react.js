@@ -45,7 +45,7 @@ var log = new winston.Logger({
 
 
 cli.setUsage("i18n4react [OPTIONS]");
-cli.setApp("i18n4react", "0.1.2");
+cli.setApp("i18n4react", "0.2.0");
 
 cli.parse({
     extract: ['e', 'Input directory', 'path'],
@@ -95,10 +95,10 @@ cli.main(function (args, options) {
                 return fs.readFileSync(filename, 'utf8');
             }).map(function(file) {
                 return JSON.parse(file);
-            }).reduce(function(collection, descriptors) {
+            }).reduce(function(original, translated) {
                 var error = false;
-                for(var key in collection) {
-                    if(!descriptors.hasOwnProperty(key)) {
+                for(var key in original) {
+                    if(!translated.hasOwnProperty(key)) {
                         error = true;
                         log.error('missing: %s', key);
                     }
