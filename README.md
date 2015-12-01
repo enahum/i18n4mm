@@ -18,6 +18,15 @@ The CLI help will display this:
       -o, --output PATH      Output directory (Default is i18n)
       -l, --lang [STRING]    Set the default language to name the merged output
                              file  (Default is en)
+      -c, --compare          Compare JSON files with the original and translated
+                             flags
+          --deep             Deep comparison includes values for each key
+      -d, --diff             Create a diff file with missing keys and changed
+                             values
+      -j, --diffFile FILE    Differential JSON file
+      -g, --original FILE    Original JSON file
+      -t, --translated FILE  Translated JSON file
+      -p, --patch            Patch an Original file with a Differential file
       -v, --version          Display the current version
       -h, --help             Display help and usage details
 
