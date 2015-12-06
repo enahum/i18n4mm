@@ -1,13 +1,14 @@
 {
-    "stage": 4,
-    "optional": [
-        "runtime",
-        "es7.objectRestSpread"
+    "presets": [
+        "es2015",
+        "react"
     ],
-    "plugins": ["react-intl"],
-    "extra": {
-        "react-intl": {
-            "messagesDir": "./temp/messages/"
-        }
-    }
+    "plugins": [
+        "transform-object-rest-spread",
+        "transform-runtime",
+        ["react-intl", {
+                    "messagesDir": "./temp/messages/",
+                    "enforceDescriptions": false
+        }]
+    ]
 }

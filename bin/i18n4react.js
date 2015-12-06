@@ -83,10 +83,7 @@ cli.main(function (args, options) {
             cp(dir, temp, ['node_modules']).read(function() {
                 files = glob(path.join(temp, "/**/*.jsx"));
                 files.forEach(function(file){
-                    babel.transformFileSync(file, {
-                        plugins: ["react-intl"],
-                        modules: "amd"
-                    });
+                    babel.transformFileSync(file);
                 });
                 console.log('done extracting');
                 merge({msgDir: msgDir, output: outDir, lang: lang}, function() {
