@@ -71,14 +71,13 @@ cli.main(function (args, options) {
     var dir = options.extract,
         compare = options.compare,
         outDir = options.output || path.join(process.cwd() + '/i18n'),
-        baseDir = path.dirname(fs.realpathSync(__filename)),
         msgDir = path.join(process.cwd(), './temp', 'messages'),
         lang = options.lang,
         base, temp, files;
 
     if(dir) {
         base = path.parse(dir).base;
-        temp = path.join(baseDir, '../temp', base);
+        temp = path.join(msgDir, '../', base);
         if(fs.lstatSync(dir).isDirectory()) {
             cp(dir, temp, ['node_modules']).read(function() {
                 files = glob(path.join(temp, "/**/*.jsx"));
@@ -87,7 +86,6 @@ cli.main(function (args, options) {
                 });
                 console.log('done extracting');
                 merge({msgDir: msgDir, output: outDir, lang: lang}, function() {
-                    clean(path.join(baseDir, '../temp'));
                     clean(path.join(msgDir, '../'));
                     console.log('done merging');
                 });
