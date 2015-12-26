@@ -5,7 +5,7 @@
 
 ## Installation
 
-    $ npm install git+https://git@github.com:ZBoxApp/i18n4react.git
+    $ npm install -g git+https://git@github.com:ZBoxApp/i18n4react.git
 
 ## Options
 The CLI help will display this:
@@ -35,9 +35,36 @@ The CLI help will display this:
 
     $ ./node_modules/.bin/i18n4react -e <directory with react-intl jsx files> -o <output directory> -l en-US
 
-## TODO
+## Dependencies
 
-Make the CLI without outside dependancies to make it work as a standalone
+To be able to use **i18n4react** in your project you need to meet this dependencies:
+
+1. Create a .babelrc file with the following content
+```json
+{
+    "presets": [
+        "es2015",
+        "react"
+    ],
+    "plugins": [
+        "transform-object-rest-spread",
+        "transform-runtime",
+        ["react-intl-zbox", {
+                    "messagesDir": "./temp/messages/",
+                    "enforceDescriptions": false
+        }]
+    ]
+}
+```
+
+2. In your project dev-dependencies install
+    - babel-plugin-react-intl-zbox
+    - babel-plugin-transform-object-rest-spread
+    - babel-plugin-transform-runtime
+    - babel-preset-es2015
+    - babel-preset-react
+
+3. Run the CLI from within your project working directory
 
 ## License
 

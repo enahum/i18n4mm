@@ -37,7 +37,7 @@
     "intl-messageformat-parser": "^1.2.0",
     "lift-result": "^0.1.5",
     "mkdirp": "^0.5.1",
-    "result": "^2.0.1",
+    "result": "^1.0.3",
     "result-type": "^1.0.0",
     "rimraf": "^2.4.4",
     "winston": "^2.1.1"
