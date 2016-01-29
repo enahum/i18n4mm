@@ -1,6 +1,6 @@
 {
   "name": "i18n4react",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI to extract react-intl ES6 strings",
   "private": false,
   "repository": {
