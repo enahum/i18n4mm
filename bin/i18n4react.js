@@ -9,7 +9,22 @@ var cli = require('cli').enable("version"),
     exec = require('child_process').exec,
     mkdirp = require('mkdirp'),
     merge = require('../lib/merge'),
-    cp = require("../lib/copy");
+    cp = require("../lib/copy"),
+    colors = {
+    error: 'red',
+    warn: 'yellow',
+    info: 'blue',
+    debug: 'green'
+    },
+    log = new winston.Logger({
+        transports: [
+            new winston.transports.Console({
+                colorize: true,
+                level: 'debug'
+            })
+        ]
+    }),
+    outDir, msgDir, lang, base, temp, files;
 
 var sortObject = function(obj) {
     return Object.keys(obj).sort().reduce(function (result, key) {
@@ -33,23 +48,7 @@ var execute = function(command, callback, errback){
     });
 };
 
-var colors = {
-    error: 'red',
-    warn: 'yellow',
-    info: 'blue',
-    debug: 'green'
-};
-
 winston.addColors(colors);
-
-var log = new winston.Logger({
-    transports: [
-        new winston.transports.Console({
-            colorize: true,
-            level: 'debug'
-        })
-    ]
-});
 
 cli.setUsage("i18n4react [OPTIONS]");
 cli.setApp("i18n4react", "0.2.0");
@@ -64,114 +63,170 @@ cli.parse({
     diffFile: ['j', 'Differential JSON file', 'file'],
     original: ['g', 'Original JSON file', 'file'],
     translated: ['t', 'Translated JSON file', 'file'],
-    patch: ['p', 'Patch an Original file with a Differential file']
+    patch: ['p', 'Patch an Original file with a Differential file'],
+    merge: ['m', 'Merge values from the Translated file found in the original file']
 });
 
 cli.main(function (args, options) {
-    var dir = options.extract,
-        compare = options.compare,
-        outDir = options.output || path.join(process.cwd() + '/i18n'),
-        msgDir = path.join(process.cwd(), './temp', 'messages'),
-        lang = options.lang,
-        base, temp, files;
+    outDir = options.output || path.join(process.cwd() + '/i18n');
+    msgDir = path.join(process.cwd(), './temp', 'messages');
+    lang = options.lang;
 
-    if(dir) {
-        base = path.parse(dir).base;
-        temp = path.join(msgDir, '../', base);
-        if(fs.lstatSync(dir).isDirectory()) {
-            cp(dir, temp, ['node_modules']).read(function() {
-                files = glob(path.join(temp, "/**/*.jsx"));
-                files.forEach(function(file){
-                    babel.transformFileSync(file);
-                });
-                console.log('done extracting');
-                merge({msgDir: msgDir, output: outDir, lang: lang}, function() {
-                    clean(path.join(msgDir, '../'));
-                    console.log('done merging');
-                });
-            });
-        } else {
-            console.error("ERROR: extract option is not a directory\n");
-            cli.getUsage(1);
-        }
+    if(options.extract) {
+        extract(options);
     }
-    else if(compare) {
-        var diff = {};
-        if(options.original && options.translated) {
-            var files = [options.original, options.translated];
-            files.map(function (filename) {
-                return fs.readFileSync(filename, 'utf8');
-            })
-                .map(function(file) {
-                return JSON.parse(file);
-            })
-                .reduce(function(original, translated) {
-                    var error = false, addToDiff;
-                    for(var key in original) {
-                        addToDiff = false;
-                        if(!translated.hasOwnProperty(key)) {
-                            error = true;
-                            addToDiff = true;
-                            log.warn('missing: %s key', key);
-                        } else if(options.deep) {
-                            if(original[key] !== translated[key]) {
-                                error = true;
-                                addToDiff = true;
-                                log.warn('not equal: %s key has different values', key);
-                            }
-                        }
-
-                        if(addToDiff && options.diff) {
-                            diff[key] = original[key];
-                        }
-                    }
-                    if(error){
-                        log.error('Add the missing keys to the translated file and try again')
-                    } else {
-                        log.info("Original and Translated files have the same keys");
-                    }
-                });
-        } else if(options.original) {
-            return console.log('Translated JSON file missing');
-        } else if (options.translated) {
-            return console.log('Original JSON file missing');
-        } else {
-            return console.log('To compare files the -g and -t flag are required')
-        }
-
-        if(options.diff && Object.keys(diff).length > 0) {
-            var filename = path.basename(options.original, '.json');
-            mkdirp.sync(outDir);
-            fs.writeFileSync(path.join(outDir, filename + '.diff.json'), JSON.stringify(sortObject(diff), null, 2));
-        }
+    else if(options.compare) {
+        compare(options);
     }
     else if(options.patch) {
-        if(options.original && options.diffFile) {
-            var files = [options.original, options.diffFile];
-            var original_with_diff = files.map(function (filename) {
-                return JSON.parse(fs.readFileSync(filename, 'utf-8'));
-            })
-                .reduce(function (original, diff) {
-                    for(var key in diff) {
-                            original[key] = diff[key];
-                    }
-
-                    return original;
-                });
-
-            mkdirp.sync(outDir);
-            fs.writeFileSync(options.original, JSON.stringify(sortObject(original_with_diff), null, 2));
-        }
-        else if(options.original) {
-            return console.log('Differential JSON file missing');
-        } else if (options.diffFile) {
-            return console.log('Original JSON file missing');
-        } else {
-            return console.log('To patch a file the -g and -j flag are required')
-        }
+        patch(options);
+    }
+    else if(options.merge) {
+        mergeFiles(options);
     }
     else {
         console.error("ERROR: directory that contains the files to be used in extraction must be set\n");
         cli.getUsage(1);
     }
 });
+
+function mergeFiles(options) {
+    var diff = {};
+    if(options.original && options.translated) {
+        files = [options.original, options.translated];
+        files.map(function (filename) {
+            return fs.readFileSync(filename, 'utf8');
+        })
+            .map(function(file) {
+                return JSON.parse(file);
+            })
+            .reduce(function(original, translated) {
+                for(var key in original) {
+
+                    if(translated.hasOwnProperty(key)) {
+                        diff[key] = translated[key];
+                        log.info("Added %s key to file", key);
+                    } else {
+                        diff[key] = original[key];
+                        log.warn('The %s key needs to be translated manually', key)
+                    }
+                }
+            });
+
+        if(Object.keys(diff).length > 0) {
+            var filename = path.basename(options.translated, '.json');
+            mkdirp.sync(outDir);
+            fs.writeFileSync(path.join(outDir, filename + '.json'), JSON.stringify(sortObject(diff), null, 2));
+        }
+        log.info("Merge complete");
+    } else if(options.original) {
+        return console.log('Translated JSON file missing');
+    } else if (options.translated) {
+        return console.log('Original JSON file missing');
+    } else {
+        return console.log('To merge files the -g and -t flag are required')
+    }
+}
+
+function compare(options) {
+    var diff = {};
+    if(options.original && options.translated) {
+        files = [options.original, options.translated];
+        files.map(function (filename) {
+            return fs.readFileSync(filename, 'utf8');
+        })
+            .map(function(file) {
+                return JSON.parse(file);
+            })
+            .reduce(function(original, translated) {
+                var error = false, addToDiff;
+                for(var key in original) {
+                    addToDiff = false;
+                    if(!translated.hasOwnProperty(key)) {
+                        error = true;
+                        addToDiff = true;
+                        log.warn('missing: %s key', key);
+                    } else if(options.deep) {
+                        if(original[key] !== translated[key]) {
+                            error = true;
+                            addToDiff = true;
+                            log.warn('not equal: %s key has different values', key);
+                        }
+                    }
+
+                    if(addToDiff && options.diff) {
+                        diff[key] = original[key];
+                    }
+                }
+                if(error){
+                    log.error('Add the missing keys to the translated file and try again')
+                } else {
+                    log.info("Original and Translated files have the same keys");
+                }
+            });
+
+        if(options.diff && Object.keys(diff).length > 0) {
+            var filename = path.basename(options.original, '.json');
+            mkdirp.sync(outDir);
+            fs.writeFileSync(path.join(outDir, filename + '.diff.json'), JSON.stringify(sortObject(diff), null, 2));
+        }
+
+    } else if(options.original) {
+        return console.log('Translated JSON file missing');
+    } else if (options.translated) {
+        return console.log('Original JSON file missing');
+    } else {
+        return console.log('To compare files the -g and -t flag are required')
+    }
+}
+
+function patch(options) {
+    if(options.original && options.diffFile) {
+        var files = [options.original, options.diffFile];
+        var original_with_diff = files.map(function (filename) {
+            return JSON.parse(fs.readFileSync(filename, 'utf-8'));
+        })
+            .reduce(function (original, diff) {
+                for(var key in diff) {
+                    original[key] = diff[key];
+                }
+
+                return original;
+            });
+
+        mkdirp.sync(outDir);
+        fs.writeFileSync(options.original, JSON.stringify(sortObject(original_with_diff), null, 2));
+    }
+    else if(options.original) {
+        return console.log('Differential JSON file missing');
+    } else if (options.diffFile) {
+        return console.log('Original JSON file missing');
+    } else {
+        return console.log('To patch a file the -g and -j flag are required')
+    }
+}
+
+function extract(options) {
+    var dir = options.extract;
+    base = path.parse(dir).base;
+    temp = path.join(msgDir, '../', base);
+    if(fs.lstatSync(dir).isDirectory()) {
+        cp(dir, temp, function() {
+            files = glob(path.join(temp, "/**/*.jsx"));
+
+            files.forEach(function(file){
+                babel.transformFileSync(file);
+            });
+
+            console.log('done extracting');
+
+            merge({msgDir: msgDir, output: outDir, lang: lang}, function() {
+                clean(path.join(msgDir, '../'));
+                console.log('done merging');
+            });
+        });
+    } else {
+        console.error("ERROR: extract option is not a directory\n");
+        cli.getUsage(1);
+    }
+}

@@ -49,7 +49,7 @@ To be able to use **i18n4react** in your project you need to meet this dependenc
     "plugins": [
         "transform-object-rest-spread",
         "transform-runtime",
-        ["react-intl-zbox", {
+        ["zbox-intl", {
                     "messagesDir": "./temp/messages/",
                     "enforceDescriptions": false
         }]
@@ -58,7 +58,7 @@ To be able to use **i18n4react** in your project you need to meet this dependenc
 ```
 
 2. In your project dev-dependencies install
-    - babel-plugin-react-intl-zbox
+    - babel-plugin-zbox-intl
     - babel-plugin-transform-object-rest-spread
     - babel-plugin-transform-runtime
     - babel-preset-es2015
