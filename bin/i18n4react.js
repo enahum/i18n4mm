@@ -51,7 +51,7 @@ var execute = function(command, callback, errback){
 winston.addColors(colors);
 
 cli.setUsage("i18n4react [OPTIONS]");
-cli.setApp("i18n4react", "0.2.0");
+cli.setApp("i18n4react", "1.1.1");
 
 cli.parse({
     extract: ['e', 'Input directory', 'path'],
