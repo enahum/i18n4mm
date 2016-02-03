@@ -10,6 +10,7 @@ var cli = require('cli').enable("version"),
     mkdirp = require('mkdirp'),
     merge = require('../lib/merge'),
     cp = require("../lib/copy"),
+    version = require('../package.json').version,
     colors = {
     error: 'red',
     warn: 'yellow',
@@ -51,7 +52,7 @@ var execute = function(command, callback, errback){
 winston.addColors(colors);
 
 cli.setUsage("i18n4react [OPTIONS]");
-cli.setApp("i18n4react", "1.1.1");
+cli.setApp("i18n4react", version);
 
 cli.parse({
     extract: ['e', 'Input directory', 'path'],
