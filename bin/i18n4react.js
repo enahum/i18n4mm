@@ -65,7 +65,8 @@ cli.parse({
     original: ['g', 'Original JSON file', 'file'],
     translated: ['t', 'Translated JSON file', 'file'],
     patch: ['p', 'Patch an Original file with a Differential file'],
-    merge: ['m', 'Merge values from the Translated file found in the original file']
+    merge: ['m', 'Merge values from the Translated file found in the original file'],
+    sort: ['s', 'Sort json file by id', 'file']
 });
 
 cli.main(function (args, options) {
@@ -84,6 +85,9 @@ cli.main(function (args, options) {
     }
     else if(options.merge) {
         mergeFiles(options);
+    }
+    else if(options.sort) {
+        sortfile(options.sort);
     }
     else {
         console.error("ERROR: directory that contains the files to be used in extraction must be set\n");
@@ -230,4 +234,14 @@ function extract(options) {
         console.error("ERROR: extract option is not a directory\n");
         cli.getUsage(1);
     }
+}
+
+function sortfile(filename) {
+    fs.readFile(filename, 'utf8', function(err, data) {
+        if (err) {
+            return log.error('Could not read %s', filename);
+        }
+        var json = JSON.parse(data);
+        fs.writeFileSync(filename, JSON.stringify(sortObject(json), null, 2));
+    });
 }
