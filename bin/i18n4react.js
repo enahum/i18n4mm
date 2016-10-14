@@ -243,5 +243,6 @@ function sortfile(filename) {
         }
         var json = JSON.parse(data);
         fs.writeFileSync(filename, JSON.stringify(sortObject(json), null, 2));
+        fs.appendFileSync(filename, '\n', 'utf8');
     });
 }
