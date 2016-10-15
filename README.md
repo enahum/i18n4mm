@@ -1,11 +1,11 @@
-# mattermost-i18n
+# i18n4mm
 
 CLI to sort Mattermost i18n files.
 
 
 ## Installation
 
-    $ npm install -g git+https://git@github.com:enahum/mattermost-18n.git
+    $ npm install -g git+https://git@github.com:enahum/i18n4mm.git
 
 ## Options
 The CLI help will display this:
