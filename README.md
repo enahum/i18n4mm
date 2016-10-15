@@ -1,76 +1,41 @@
-# i18n4React
+# mattermost-i18n
 
-[React-Intl](https://github.com/yahoo/react-intl) CLI for extracting strings for globalization.
+CLI to sort Mattermost i18n files.
 
 
 ## Installation
 
-    $ npm install -g git+https://git@github.com:ZBoxApp/i18n4react.git
+    $ npm install -g git+https://git@github.com:enahum/mattermost-18n.git
 
 ## Options
 The CLI help will display this:
 
     Usage:
-      i18n4react [OPTIONS]
-
-    Options:
-      -e, --extract PATH     Input directory
+      i18n4mm [OPTIONS]
+    
+    Options: 
       -o, --output PATH      Output directory (Default is i18n)
-      -l, --lang [STRING]    Set the default language to name the merged output
-                             file  (Default is en)
-      -c, --compare          Compare JSON files with the original and translated
-                             flags
-          --deep             Deep comparison includes values for each key
-      -d, --diff             Create a diff file with missing keys and changed
-                             values
-      -j, --diffFile FILE    Differential JSON file
-      -g, --original FILE    Original JSON file
-      -t, --translated FILE  Translated JSON file
-      -p, --patch            Patch an Original file with a Differential file
+      -s, --sort STRING      Sort platform or webapp i18n file
+      -p, --prop STRING      The property to use when sorting
+      -f, --filename FILE    JSON file
       -v, --version          Display the current version
       -h, --help             Display help and usage details
 
 
-## Usage
+## Sort platform i18n files
 
-    $ ./node_modules/.bin/i18n4react -e <directory with react-intl jsx files> -o <output directory> -l en-US
+    $ i18n4mm -s platform -o <output directory> -p <property> -f <file>
 
-## Dependencies
+## Sort webapp i18n files
 
-To be able to use **i18n4react** in your project you need to meet this dependencies:
+    $ i18n4mm -s webapp -o <output directory> -f <file>
 
-1. Create a .babelrc file with the following content
-```json
-{
-    "presets": [
-        "es2015",
-        "react"
-    ],
-    "plugins": [
-        "transform-object-rest-spread",
-        "transform-runtime",
-        ["zbox-intl", {
-                    "messagesDir": "./temp/messages/",
-                    "enforceDescriptions": false
-        }]
-    ]
-}
-```
-
-2. In your project dev-dependencies install
-    - babel-plugin-zbox-intl
-    - babel-plugin-transform-object-rest-spread
-    - babel-plugin-transform-runtime
-    - babel-preset-es2015
-    - babel-preset-react
-
-3. Run the CLI from within your project working directory
 
 ## License
 
 (The MIT License)
 
-Copyright (c) 2012 Sudhakar Mani
+Copyright (c) 2016 Elias Nahum
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
