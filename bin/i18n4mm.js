@@ -42,7 +42,9 @@ cli.parse({
     output: ['o', 'Output directory (Default is i18n)', 'path'],
     sort: ['s', 'Sort platform or webapp i18n file', 'string'],
     prop: ['p', 'The property to use when sorting', 'string'],
-    filename: ['f', 'JSON file', 'file']
+    merge: ['m', 'Merge webapp and react-native i18n files'],
+    filename: ['f', 'JSON file', 'file'],
+    mobile: ['r', 'React native JSON file', 'file']
 });
 
 cli.main(function (args, options) {
@@ -57,6 +59,9 @@ cli.main(function (args, options) {
             log.info("Sorting by %s", options.prop);
         }
         sort(options);
+    } else if (options.merge && options.filename && options.mobile) {
+        log.info('Merging webapp and react native localization file');
+        merge(options);
     } else {
         return cli.getUsage(1);
     }
@@ -85,6 +90,24 @@ function sort(options) {
         jsonContent = sortObjectByKey(content);
     }
 
+    fs.writeFileSync(destination, JSON.stringify(jsonContent, null, 2));
+    fs.appendFileSync(destination, '\n', 'utf8');
+}
+
+function merge(options) {
+    var outDir = options.output || path.join(process.cwd() + '/i18n');
+    var webapp = JSON.parse(fs.readFileSync(options.filename, 'utf-8'));
+    var mobile = JSON.parse(fs.readFileSync(options.mobile, 'utf-8'));
+
+    var filename = path.basename(options.filename, '.json');
+    var destination = path.join(outDir, filename + '.json');
+
+    Object.keys(mobile).forEach(function(key) {
+        if (key.startsWith('mobile.')) {
+            webapp[key] = mobile[key];
+        }
+    });
+    var jsonContent = sortObjectByKey(webapp);
     fs.writeFileSync(destination, JSON.stringify(jsonContent, null, 2));
     fs.appendFileSync(destination, '\n', 'utf8');
 }
